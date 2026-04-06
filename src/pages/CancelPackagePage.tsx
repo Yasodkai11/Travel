@@ -1,8 +1,79 @@
-import React from 'react';
-import { FlightCard } from '../components/cards/FlightCard';
-import { HotelCard } from '../components/cards/HotelCard';
-import { AlertTriangle } from 'lucide-react';
+import React, { useState } from "react";
+import { AlertTriangle } from "lucide-react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+
+interface PackageBookingState {
+  booking?: {
+    id: number;
+    package_id: number;
+    start_date: string;
+    status: string;
+    package?: {
+      id: number;
+      title: string;
+      location: string;
+      duration_days: number;
+      price: number;
+      description?: string;
+    };
+  };
+}
+
 export function CancelPackagePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { bookingId: bookingIdParam } = useParams();
+  const apiBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  const booking = (location.state as PackageBookingState | null)?.booking;
+  const bookingId = booking?.id ?? Number.parseInt(bookingIdParam || "", 10);
+
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleCancel = async () => {
+    if (!Number.isFinite(bookingId)) {
+      setErrorMessage("Missing booking id. Please return to the dashboard.");
+      return;
+    }
+
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setErrorMessage("Please login first to cancel this booking.");
+      return;
+    }
+
+    setIsCancelling(true);
+    setErrorMessage("");
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/packages/cancel/${bookingId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        setErrorMessage(data?.detail || "Unable to cancel package booking.");
+        return;
+      }
+
+      navigate("/dashboard");
+    } catch (error) {
+      setErrorMessage("Unable to cancel package booking right now.");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const pkg = booking?.package;
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-16 text-center">
       <div className="mb-8 flex justify-center text-red-500">
@@ -16,34 +87,75 @@ export function CancelPackagePage() {
         be undone.
       </p>
 
-      <div className="text-left space-y-6 mb-12">
-        <FlightCard
-          company="SriLankan Airlines"
-          flightNumber="UL-504"
-          from="Colombo"
-          to="Dubai"
-          deptTime="02:00 PM"
-          destTime="06:30 PM"
-          price="Included" />
+      <div className="text-left mb-12 space-y-4">
+        {pkg ? (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden p-6">
+            <h3 className="text-xl font-bold text-primary mb-2">{pkg.title}</h3>
+            <p className="text-gray-600 mb-2">
+              <span className="font-semibold">Location:</span> {pkg.location}
+            </p>
+            <p className="text-gray-600 mb-2">
+              <span className="font-semibold">Duration:</span>{" "}
+              {pkg.duration_days} days
+            </p>
+            <p className="text-gray-600 mb-2">
+              <span className="font-semibold">Price:</span> LKR{" "}
+              {Number(pkg.price).toFixed(2)}
+            </p>
+            {pkg.description && (
+              <p className="text-gray-600">
+                <span className="font-semibold">Description:</span>{" "}
+                {pkg.description}
+              </p>
+            )}
+          </div>
+        ) : null}
 
-        <HotelCard
-          name="Heritance Kandalama"
-          address="Dambulla, Central Province"
-          distanceFromAirport="150 km"
-          price="Included"
-          amenities="Infinity Pool, Ayurveda Spa, Nature Trails"
-          stars={5} />
-
+        {booking ? (
+          <div className="rounded-lg border border-gray-200 bg-white p-4 text-left text-sm text-gray-600">
+            <p>
+              <span className="font-semibold text-gray-800">Booking ID:</span>{" "}
+              {Number.isFinite(bookingId) ? bookingId : "Unavailable"}
+            </p>
+            {booking.start_date ? (
+              <p className="mt-1">
+                <span className="font-semibold text-gray-800">Start Date:</span>{" "}
+                {new Date(booking.start_date).toLocaleDateString()}
+              </p>
+            ) : null}
+            {booking.status ? (
+              <p className="mt-1">
+                <span className="font-semibold text-gray-800">Status:</span>{" "}
+                {booking.status.toUpperCase()}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
+
+      {errorMessage ? (
+        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      ) : null}
 
       <div className="flex justify-center gap-4">
-        <button className="px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300 transition">
+        <button
+          type="button"
+          onClick={() => navigate("/dashboard")}
+          className="px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded hover:bg-gray-300 transition"
+        >
           Go Back
         </button>
-        <button className="px-8 py-3 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition shadow-lg">
-          C A N C E L
+        <button
+          type="button"
+          onClick={handleCancel}
+          disabled={isCancelling || !Number.isFinite(bookingId)}
+          className="px-8 py-3 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition shadow-lg disabled:cursor-not-allowed disabled:bg-red-300"
+        >
+          {isCancelling ? "CANCELLING..." : "CANCEL"}
         </button>
       </div>
-    </div>);
-
+    </div>
+  );
 }

@@ -9,6 +9,7 @@ interface HotelApiRecord {
   price_per_night: number;
   rating: number | null;
   description: string | null;
+  image_url: string | null;
 }
 
 interface HotelPaymentResult {
@@ -56,6 +57,9 @@ export function BookHotelPage() {
     preselectedCheckInDate?: string;
   } | null;
   const selectedHotel = routeState?.hotel;
+  const selectedHotelImageUrl = selectedHotel?.image_url
+    ? `${apiBaseUrl}${selectedHotel.image_url}`
+    : undefined;
 
   const today = formatInputDate(new Date());
   const defaultCheckIn = routeState?.preselectedCheckInDate || today;
@@ -263,6 +267,7 @@ export function BookHotelPage() {
             <HotelCard
               name={selectedHotel.name}
               address={selectedHotel.location}
+              imageUrl={selectedHotelImageUrl}
               distanceFromAirport="Distance details available at check-in"
               price={`LKR ${Number(selectedHotel.price_per_night).toFixed(2)}`}
               amenities={

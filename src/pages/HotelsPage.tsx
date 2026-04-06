@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { HotelCard } from "../components/cards/HotelCard";
 import { WeatherTable } from "../components/WeatherTable";
@@ -16,8 +16,36 @@ interface HotelApiRecord {
 export function HotelsPage() {
   const apiBaseUrl =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+  const districts = [
+    "Ampara",
+    "Anuradhapura",
+    "Badulla",
+    "Batticaloa",
+    "Colombo",
+    "Galle",
+    "Gampaha",
+    "Hambantota",
+    "Jaffna",
+    "Kalutara",
+    "Kandy",
+    "Kegalle",
+    "Kilinochchi",
+    "Kurunegala",
+    "Mannar",
+    "Matale",
+    "Matara",
+    "Monaragala",
+    "Mullaitivu",
+    "Nuwara Eliya",
+    "Polonnaruwa",
+    "Puttalam",
+    "Ratnapura",
+    "Trincomalee",
+    "Vavuniya",
+  ];
   const [city, setCity] = useState("");
   const [checkInDate, setCheckInDate] = useState("");
+  const [district, setDistrict] = useState("Colombo");
   const [hotels, setHotels] = useState<HotelApiRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -75,7 +103,7 @@ export function HotelsPage() {
         {/* Search Form */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-12 border border-gray-100">
           <form
-            className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
+            className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end"
             onSubmit={(e) => e.preventDefault()}
           >
             <div className="md:col-span-2">
@@ -105,6 +133,24 @@ export function HotelsPage() {
                 className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-gray-50"
               />
             </div>
+            <div>
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">
+                District
+              </label>
+              <select
+                name="district"
+                id="district"
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary bg-gray-50"
+              >
+                {districts.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <button
               type="submit"
               className="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition flex items-center justify-center gap-2"
@@ -116,7 +162,11 @@ export function HotelsPage() {
         </div>
 
         {/* Weather Section */}
-        <WeatherTable cityName="Colombo" />
+        <WeatherTable
+          districtName={district}
+          travelDate={checkInDate}
+          apiBaseUrl={apiBaseUrl}
+        />
 
         {/* Results */}
         <h2 className="text-2xl font-bold text-gray-800 mb-6 border-l-4 border-accent pl-4">

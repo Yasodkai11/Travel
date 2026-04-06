@@ -49,9 +49,18 @@ export function App() {
           <Route path="/book-hotel" element={<BookHotelPage />} />
           <Route path="/book-package" element={<BookPackagePage />} />
 
-          <Route path="/cancel-train" element={<CancelTrainPage />} />
-          <Route path="/cancel-hotel" element={<CancelHotelPage />} />
-          <Route path="/cancel-package" element={<CancelPackagePage />} />
+          <Route
+            path="/cancel-train/:bookingId"
+            element={<CancelTrainPage />}
+          />
+          <Route
+            path="/cancel-hotel/:bookingId"
+            element={<CancelHotelPage />}
+          />
+          <Route
+            path="/cancel-package/:bookingId"
+            element={<CancelPackagePage />}
+          />
         </Routes>
       </Layout>
     </HashRouter>

@@ -218,7 +218,8 @@ export function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            to="/cancel-train"
+                            to={`/cancel-train/${booking.id}`}
+                            state={{ booking }}
                             className="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 px-3 py-1 rounded hover:bg-red-50"
                           >
                             CANCEL
@@ -292,7 +293,8 @@ export function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            to="/cancel-hotel"
+                            to={`/cancel-hotel/${booking.id}`}
+                            state={{ booking }}
                             className="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 px-3 py-1 rounded hover:bg-red-50"
                           >
                             CANCEL
@@ -366,7 +368,8 @@ export function DashboardPage() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link
-                            to="/cancel-package"
+                            to={`/cancel-package/${booking.id}`}
+                            state={{ booking }}
                             className="text-red-500 hover:text-red-700 font-medium text-xs border border-red-200 px-3 py-1 rounded hover:bg-red-50"
                           >
                             CANCEL
